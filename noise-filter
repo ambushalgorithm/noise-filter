@@ -145,7 +145,7 @@ else
 fi
 
 echo "Running audio-separator to extract vocals stem..."
-BEARTYPE=disable "$AUDIO_SEPARATOR" "$AUDIO_TO_SEPARATE" --output_format wav --output_dir "$TEMP_DIR" 2>&1 || die "audio-separator failed."
+"$AUDIO_SEPARATOR" "$AUDIO_TO_SEPARATE" --output_format wav --output_dir "$TEMP_DIR" 2>&1 || die "audio-separator failed."
 
 VOCALS=$(ls -t "$TEMP_DIR"/*"(Vocals)"*.wav 2>/dev/null | head -n 1)
 
