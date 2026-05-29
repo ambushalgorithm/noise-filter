@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-ENHANCE_VOICE="$PROJECT_DIR/enhance-voice"
+NOISE_FILTER="$PROJECT_DIR/noise-filter"
 AUDIO_SEPARATOR="$HOME/.venvs/audio-separator/bin/audio-separator"
 TEMP_DIR=""
 PASSED=0
@@ -46,7 +46,7 @@ TEMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enhance-voice-test.XXXXXX")
 
 # Test 1: --help
 echo "Test 1: --help flag exits 0"
-output=$("$ENHANCE_VOICE" --help 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" --help 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$exit_code" "--help exits 0"
 assert_contains "$output" "Usage:" "--help contains Usage:"
@@ -56,39 +56,39 @@ assert_contains "$output" "-o" "--help mentions -o"
 
 # Test 2: -h
 echo "Test 2: -h alias exits 0"
-output=$("$ENHANCE_VOICE" -h 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" -h 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$exit_code" "-h exits 0"
 
 # Test 3: No input
 echo "Test 3: No input exits 1"
-output=$("$ENHANCE_VOICE" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$exit_code" "No input exits 1"
 assert_contains "$output" "Error:" "No input shows Error"
 
 # Test 4: Nonexistent file
 echo "Test 4: Nonexistent file exits 1"
-output=$("$ENHANCE_VOICE" "$PROJECT_DIR/nonexistent-file.mkv" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$PROJECT_DIR/nonexistent-file.mkv" 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$exit_code" "Nonexistent file exits 1"
 assert_contains "$output" "not found" "Nonexistent file shows 'not found'"
 
 # Test 5: -o without arg
 echo "Test 5: -o with no argument exits 1"
-output=$("$ENHANCE_VOICE" -o 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" -o 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$exit_code" "-o with no arg exits 1"
 
 # Test 6: Unknown option
 echo "Test 6: Unknown option exits 1"
-output=$("$ENHANCE_VOICE" --bogus-option 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" --bogus-option 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$exit_code" "Unknown option exits 1"
 
 # Test 7: Multiple inputs
 echo "Test 7: Multiple input files exits 1"
-output=$("$ENHANCE_VOICE" "file1.mkv" "file2.mkv" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "file1.mkv" "file2.mkv" 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$exit_code" "Multiple input files exits 1"
 
@@ -107,7 +107,7 @@ TEST_DEP_INPUT="$TEMP_DIR/dep-test.mkv"
 ffmpeg -y -f lavfi -i "testsrc=duration=1:size=64x48:rate=10" \
     -f lavfi -i "sine=frequency=440:duration=1" \
     -c:v libx264 -c:a pcm_s16le -t 1 "$TEST_DEP_INPUT" -loglevel warning 2>/dev/null
-output=$(PATH="$MOCK_BIN" /usr/bin/bash "$ENHANCE_VOICE" "$TEST_DEP_INPUT" 2>&1; echo "EXIT:$?")
+output=$(PATH="$MOCK_BIN" /usr/bin/bash "$NOISE_FILTER" "$TEST_DEP_INPUT" 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$exit_code" "Missing ffmpeg exits 1"
 assert_contains "$output" "ffmpeg" "Missing ffmpeg shows error"
@@ -143,7 +143,7 @@ ffmpeg -y -f lavfi -i "testsrc=duration=2:size=64x48:rate=10" \
 
 # Test 9: Process real .mkv
 echo "Test 9: Process real .mkv file"
-output=$("$ENHANCE_VOICE" "$TEST_INPUT" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$TEST_INPUT" 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$exit_code" "Processing exits 0"
 assert_contains "$output" "Done." "Processing shows 'Done.'"
@@ -160,21 +160,21 @@ fi
 
 # Test 10: Overwrite protection (via -o)
 echo "Test 10: Overwrite protection"
-output=$("$ENHANCE_VOICE" "$TEST_INPUT" -o "$TEST_OUTPUT_DEFAULT" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$TEST_INPUT" -o "$TEST_OUTPUT_DEFAULT" 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$exit_code" "Overwrite protection exits 1"
 assert_contains "$output" "already exists" "Overwrite shows 'already exists'"
 
 # Test 11: --force overwrite (via -o)
 echo "Test 11: --force overwrite"
-output=$("$ENHANCE_VOICE" "$TEST_INPUT" -o "$TEST_OUTPUT_DEFAULT" --force 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$TEST_INPUT" -o "$TEST_OUTPUT_DEFAULT" --force 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$exit_code" "--force exits 0"
 assert_contains "$output" "Done." "--force processing shows 'Done.'"
 
 # Test 12: -o custom output
 echo "Test 12: -o custom output path"
-output=$("$ENHANCE_VOICE" "$TEST_INPUT" -o "$TEST_OUTPUT_CUSTOM" --force 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$TEST_INPUT" -o "$TEST_OUTPUT_CUSTOM" --force 2>&1; echo "EXIT:$?")
 exit_code=$(printf '%s\n' "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$exit_code" "-o exits 0"
 assert_contains "$output" "test-custom-output" "-o output has custom name"

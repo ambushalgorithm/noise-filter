@@ -19,7 +19,7 @@ Thank you for considering contributing! This document covers the development wor
 
 ### Prerequisites
 
-- **FFmpeg 4.4+** — required by both `enhance-voice` and `noise-filter`
+- **FFmpeg 4.4+** — required by both the Python CLI (`noise-filter`) and the Bash script (`./noise-filter`)
   - Linux: `sudo apt install ffmpeg`
   - macOS: `brew install ffmpeg`
 - **Python 3.11+** — for the CLI/TUI package
@@ -51,10 +51,10 @@ The mock is found automatically by `find_audio_separator()` in `noise_filter/sub
 
 ### Running the Bash Script
 
-The `enhance-voice` script has no Python dependencies:
+The `./noise-filter` Bash script has no Python dependencies:
 
 ```bash
-./enhance-voice --help
+./noise-filter --help
 ```
 
 ---
@@ -63,7 +63,7 @@ The `enhance-voice` script has no Python dependencies:
 
 ```
 noise-filter/
-├── enhance-voice              # Bash script — voice enhancement engine
+├── noise-filter              # Bash script — voice enhancement engine
 ├── noise_filter/              # Python package
 │   ├── cli.py                 # Click CLI entry point
 │   ├── config.py              # TOML config loading
@@ -115,7 +115,7 @@ pytest --ignore=tests/test_e2e_tui.py
 
 ```bash
 # ShellCheck lint (install via apt/brew: shellcheck)
-shellcheck enhance-voice
+shellcheck noise-filter
 
 # Unit tests
 bash tests/test_enhance_voice.sh
@@ -165,7 +165,7 @@ def process_file(path: Path, preset: str = "medium") -> Optional[str]:
     ...
 ```
 
-### Shell (enhance-voice)
+### Shell (noise-filter)
 
 - **Google Shell Style Guide** — see https://google.github.io/styleguide/shellguide.html
 - Use `command -v` (not `which`) for dependency checks
@@ -197,7 +197,7 @@ def process_file(path: Path, preset: str = "medium") -> Optional[str]:
 4. **Run the tests** to ensure nothing is broken:
    ```bash
    pytest
-   shellcheck enhance-voice
+   shellcheck noise-filter
    ```
 
 5. **Commit** with a descriptive message:

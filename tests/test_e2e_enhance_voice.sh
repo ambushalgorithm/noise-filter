@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-ENHANCE_VOICE="$PROJECT_DIR/enhance-voice"
+NOISE_FILTER="$PROJECT_DIR/noise-filter"
 AUDIO_SEPARATOR="$HOME/.venvs/audio-separator/bin/audio-separator"
 SMALL_MKV="$PROJECT_DIR/movie-samples/Screen-2026-05-25_07-39-11.mkv"
 LARGE_MKV="$PROJECT_DIR/movie-samples/Camo-Studio-Input-Camera-2026-05-25_07-39-11.mkv"
@@ -62,9 +62,9 @@ trap cleanup_e2e EXIT INT TERM
 TEMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enhance-voice-e2e.XXXXXX")
 
 echo "=========================================="
-echo "  E2E Tests: enhance-voice"
+echo "  E2E Tests: noise-filter"
 echo "=========================================="
-echo "Script:        $ENHANCE_VOICE"
+echo "Script:        $NOISE_FILTER"
 echo "Small video:   $SMALL_MKV"
 echo "Large video:   $LARGE_MKV"
 echo ""
@@ -89,7 +89,7 @@ fi
 # ============================================================
 
 echo "--- AC-17: --help flag ---"
-output=$("$ENHANCE_VOICE" --help 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" --help 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$ec" "AC-17: --help exits 0"
 assert_contains "$output" "Usage:" "AC-17: --help shows Usage"
@@ -106,13 +106,13 @@ echo "--- AC-01: Accepts <input> as first argument ---"
 assert_file_exists "$SMALL_MKV" "AC-01: Small video file exists"
 
 echo "--- AC-04: No input exits 1 ---"
-output=$("$ENHANCE_VOICE" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$ec" "AC-04: No input exits 1"
 assert_contains "$output" "Error:" "AC-04: No input shows Error"
 
 echo "--- AC-05: Nonexistent file exits 1 ---"
-output=$("$ENHANCE_VOICE" "$TEMP_DIR/nonexistent-file.mkv" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$TEMP_DIR/nonexistent-file.mkv" 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$ec" "AC-05: Nonexistent file exits 1"
 assert_contains "$output" "not found" "AC-05: Shows 'not found'"
@@ -131,7 +131,7 @@ TEST_DEP_INPUT="$TEMP_DIR/dep-test.mkv"
 ffmpeg -y -f lavfi -i "testsrc=duration=1:size=64x48:rate=10" \
     -f lavfi -i "sine=frequency=440:duration=1" \
     -c:v libx264 -c:a pcm_s16le -t 1 "$TEST_DEP_INPUT" -loglevel warning 2>/dev/null || true
-output=$(PATH="$MOCK_BIN" /usr/bin/bash "$ENHANCE_VOICE" "$TEST_DEP_INPUT" 2>&1; echo "EXIT:$?")
+output=$(PATH="$MOCK_BIN" /usr/bin/bash "$NOISE_FILTER" "$TEST_DEP_INPUT" 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$ec" "AC-06: Missing ffmpeg exits 1"
 assert_contains "$output" "ffmpeg" "AC-06: Error mentions ffmpeg"
@@ -155,7 +155,7 @@ TEST_DEP_INPUT="$TEMP_DIR/dep-test-asep.mkv"
 ffmpeg -y -f lavfi -i "testsrc=duration=1:size=64x48:rate=10" \
     -f lavfi -i "sine=frequency=440:duration=1" \
     -c:v libx264 -c:a pcm_s16le -t 1 "$TEST_DEP_INPUT" -loglevel warning 2>/dev/null || true
-output=$(HOME="$MOCK_HOME" PATH="$MOCK_HOME/bin" /usr/bin/bash "$ENHANCE_VOICE" "$TEST_DEP_INPUT" 2>&1; echo "EXIT:$?")
+output=$(HOME="$MOCK_HOME" PATH="$MOCK_HOME/bin" /usr/bin/bash "$NOISE_FILTER" "$TEST_DEP_INPUT" 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$ec" "AC-13: Missing audio-separator exits 1"
 assert_contains "$output" "audio-separator" "AC-13: Error mentions audio-separator"
@@ -165,14 +165,14 @@ echo "--- AC-14: No audio stream exits with error ---"
 NO_AUDIO_INPUT="$TEMP_DIR/no-audio-video.mkv"
 ffmpeg -y -f lavfi -i "testsrc=duration=1:size=64x48:rate=10" \
     -c:v libx264 -t 1 "$NO_AUDIO_INPUT" -loglevel warning 2>/dev/null || true
-output=$("$ENHANCE_VOICE" "$NO_AUDIO_INPUT" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$NO_AUDIO_INPUT" 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$ec" "AC-14: No audio stream exits 1"
 assert_contains "$output" "No audio stream" "AC-14: Error mentions 'No audio stream'"
 
 echo "--- AC-18: Script source contains exact filter chain ---"
 FILTER_CHAIN='highpass=f=120,afftdn=nf=-30,anlmdn=s=7:p=0.002,acompressor=threshold=-18dB:ratio=3,equalizer=f=3000:t=q:w=1:g=4,lowpass=f=9000'
-if grep -Fq "$FILTER_CHAIN" "$ENHANCE_VOICE"; then
+if grep -Fq "$FILTER_CHAIN" "$NOISE_FILTER"; then
     echo "  PASS: AC-18: Exact filter chain found in script source"
     PASSED=$((PASSED + 1))
 else
@@ -197,7 +197,7 @@ SMALL_DEFAULT_DIR="$TEMP_DIR/default-output"
 mkdir -p "$SMALL_DEFAULT_DIR"
 
 echo "--- AC-03: Custom output via -o + AC-10: Small file processing ---"
-output=$("$ENHANCE_VOICE" "$SMALL_MKV" -o "$SMALL_OUTPUT" --force 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$SMALL_MKV" -o "$SMALL_OUTPUT" --force 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$ec" "AC-03+AC-10: Small file processing exits 0"
 assert_contains "$output" "Done." "AC-03: Shows Done."
@@ -225,20 +225,20 @@ else
 fi
 
 echo "--- AC-07: Overwrite protection ---"
-output=$("$ENHANCE_VOICE" "$SMALL_MKV" -o "$SMALL_OUTPUT" 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$SMALL_MKV" -o "$SMALL_OUTPUT" 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "1" "$ec" "AC-07: Overwrite protection exits 1"
 assert_contains "$output" "already exists" "AC-07: Shows 'already exists'"
 
 echo "--- AC-07: --force overwrite works ---"
-output=$("$ENHANCE_VOICE" "$SMALL_MKV" -o "$SMALL_OUTPUT" --force 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$SMALL_MKV" -o "$SMALL_OUTPUT" --force 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$ec" "AC-07: --force exits 0"
 assert_contains "$output" "Done." "AC-07: --force shows Done."
 
 echo "--- AC-02: Default output has _voice_enhanced suffix ---"
 cp "$SMALL_MKV" "$SMALL_DEFAULT_DIR/Screen-2026-05-25_07-39-11.mkv"
-output=$("$ENHANCE_VOICE" "$SMALL_DEFAULT_DIR/Screen-2026-05-25_07-39-11.mkv" --force 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$SMALL_DEFAULT_DIR/Screen-2026-05-25_07-39-11.mkv" --force 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$ec" "AC-02: Default output processing exits 0"
 assert_contains "$output" "_VOICE_ENHANCED" "AC-02: Output path contains _VOICE_ENHANCED"
@@ -262,7 +262,7 @@ SIGTEST_OUTPUT="$TEMP_DIR/sigtest-output.wav"
 ffmpeg -y -f lavfi -i "testsrc=duration=30:size=64x48:rate=10" \
     -f lavfi -i "sine=frequency=440:duration=30" \
     -c:v libx264 -c:a pcm_s16le -t 30 "$SIGTEST_INPUT" -loglevel warning 2>/dev/null
-"$ENHANCE_VOICE" "$SIGTEST_INPUT" -o "$SIGTEST_OUTPUT" --force &>/dev/null &
+"$NOISE_FILTER" "$SIGTEST_INPUT" -o "$SIGTEST_OUTPUT" --force &>/dev/null &
 PID=$!
 sleep 2
 kill -INT "$PID" 2>/dev/null || true
@@ -289,7 +289,7 @@ LARGE_OUTPUT="$TEMP_DIR/large-enhanced.wav"
 
 if [[ "$FAILED" -eq 0 ]]; then
     echo "--- AC-11: Process large .mkv (~800 MB) ---"
-    output=$("$ENHANCE_VOICE" "$LARGE_MKV" -o "$LARGE_OUTPUT" --force 2>&1; echo "EXIT:$?")
+    output=$("$NOISE_FILTER" "$LARGE_MKV" -o "$LARGE_OUTPUT" --force 2>&1; echo "EXIT:$?")
     ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
     assert_eq "0" "$ec" "AC-11: Large file processing exits 0"
     assert_contains "$output" "Done." "AC-11: Large file shows Done."
@@ -325,7 +325,7 @@ ffmpeg -y -f lavfi -i "sine=frequency=440:duration=2" \
 assert_file_exists "$AUDIO_ONLY_INPUT" "AC-12: Audio input file created"
 
 echo "--- AC-12: Process audio-only file ---"
-output=$("$ENHANCE_VOICE" "$AUDIO_ONLY_INPUT" -o "$AUDIO_ONLY_OUTPUT" --force 2>&1; echo "EXIT:$?")
+output=$("$NOISE_FILTER" "$AUDIO_ONLY_INPUT" -o "$AUDIO_ONLY_OUTPUT" --force 2>&1; echo "EXIT:$?")
 ec=$(printf "%s\n" "$output" | grep "EXIT:" | cut -d: -f2)
 assert_eq "0" "$ec" "AC-12: Audio-only processing exits 0"
 assert_contains "$output" "Done." "AC-12: Audio-only shows Done."

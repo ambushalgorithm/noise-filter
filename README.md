@@ -10,8 +10,8 @@ Noise Filter is a voice enhancement tool that extracts vocals from audio/video, 
 
 It ships in two forms:
 
-- **`noise-filter`** — Python CLI (Click) + TUI (Textual) with preset profiles, per-filter overrides, TOML config
-- **`enhance-voice`** — standalone Bash script with no Python dependency
+- **`noise-filter` (Python CLI)** — Click CLI + Textual TUI with preset profiles, per-filter overrides, TOML config
+- **`./noise-filter` (Bash script)** — standalone Bash script with no Python dependency
 
 Both use the same backend pipeline: `audio-separator` for vocals extraction followed by FFmpeg's filter chain.
 
@@ -62,7 +62,7 @@ For the Python CLI/TUI, you also need Python 3.11+ with `pip`.
 
 ### Quick Start (Bash Script)
 
-The `enhance-voice` script has no Python dependencies — only FFmpeg and `audio-separator` are required.
+The `./noise-filter` Bash script has no Python dependencies — only FFmpeg and `audio-separator` are required.
 
 ```bash
 # Install FFmpeg
@@ -75,7 +75,7 @@ pip install audio-separator
 # Download and use the script
 git clone https://github.com/anomalyco/noise-filter.git
 cd noise-filter
-./enhance-voice recording.mkv
+./noise-filter recording.mkv
 ```
 
 ### Python Package
@@ -96,7 +96,7 @@ Dependencies installed automatically: `click`, `toml`, `textual`, `platformdirs`
 
 ```bash
 # Bash script
-./enhance-voice --help
+./noise-filter --help
 
 # Python CLI
 noise-filter --help
@@ -151,7 +151,7 @@ noise-filter -p heavy --highpass-freq 150 --equalizer-gain 4 meeting.mkv
 noise-filter input.mp4 -o ~/enhanced/
 
 # Custom output filename via the Bash script
-./enhance-voice input.wav -o my-custom-name.wav
+./noise-filter input.wav -o my-custom-name.wav
 ```
 
 ### Presets
@@ -161,7 +161,7 @@ Four presets control all 6 filters simultaneously:
 | Preset | Best for |
 |--------|----------|
 | `light` | Already-clean audio (quiet room, good mic) — preserves natural timbre |
-| `medium` | General-purpose voice enhancement (podcasts, meetings, voiceovers) — matches original `enhance-voice` defaults |
+| `medium` | General-purpose voice enhancement (podcasts, meetings, voiceovers) — matches original `./noise-filter` defaults |
 | `heavy` | Poor recording conditions (outdoor, cafe, construction noise) — may sound processed |
 | `custom` | User-defined values from config file `[override]` section |
 
@@ -211,12 +211,12 @@ The TUI has 3 screens with forward/back navigation:
 2. **Filter Parameters** — All 11 per-filter parameter inputs with live filter chain preview, "← Back" and "Next →" buttons
 3. **Run & Results** — Filter chain preview string, Run button, progress bar, status/output text, "← Back" button
 
-### Using enhance-voice Directly
+### Using noise-filter Directly
 
 The Bash script offers a lightweight alternative with no Python dependency:
 
 ```bash
-./enhance-voice <input> [options]
+./noise-filter <input> [options]
 
 Options:
   -o <path>    Custom output file path
@@ -381,7 +381,7 @@ OUTPUT: _VOICE_ENHANCED_NN.wav
 
 ```
 noise-filter/
-├── enhance-voice              # Bash script — original voice enhancement engine
+├── noise-filter              # Bash script — original voice enhancement engine
 ├── noise_filter/              # Python package — CLI + TUI wrapper
 │   ├── __init__.py
 │   ├── cli.py                 # Click CLI entry point
