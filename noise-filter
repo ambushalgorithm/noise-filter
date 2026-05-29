@@ -113,10 +113,11 @@ next_output_path() {
     done
 }
 
+BASENAME="${INPUT_FILE##*/}"
+BASENAME="${BASENAME%.*}"
+
 if [[ -z "$OUTPUT_FILE" ]]; then
     INPUT_DIR="$(cd "$(dirname "$INPUT_FILE")" && pwd)"
-    BASENAME="${INPUT_FILE##*/}"
-    BASENAME="${BASENAME%.*}"
     OUTPUT_FILE="$(next_output_path "$INPUT_DIR" "${BASENAME}_voice_enhanced" "wav")"
 fi
 
@@ -156,6 +157,19 @@ echo "Enhancing voice..."
 ffmpeg -y -i "$VOCALS" \
     -af "highpass=f=120,afftdn=nf=-30,anlmdn=s=7:p=0.002,acompressor=threshold=-18dB:ratio=3,equalizer=f=3000:t=q:w=1:g=4,lowpass=f=9000" \
     "$OUTPUT_FILE" -loglevel warning -stats 2>&1 || die "Voice enhancement failed."
+
+OUTPUT_DIR="$(dirname "$OUTPUT_FILE")"
+
+INSTRUMENTAL=$(ls -t "$TEMP_DIR"/*"(Instrumental)"*.wav 2>/dev/null | head -n 1) || true
+if [[ -n "$INSTRUMENTAL" ]]; then
+    INSTRUMENTAL_OUTPUT="$(next_output_path "$OUTPUT_DIR" "${BASENAME}_INSTRUMENTALS" "wav")"
+    cp "$INSTRUMENTAL" "$INSTRUMENTAL_OUTPUT"
+    echo "Copied instrumental stem: $INSTRUMENTAL_OUTPUT"
+fi
+
+VOCALS_OUTPUT="$(next_output_path "$OUTPUT_DIR" "${BASENAME}_VOCALS" "wav")"
+cp "$VOCALS" "$VOCALS_OUTPUT"
+echo "Copied vocals stem: $VOCALS_OUTPUT"
 
 echo "Done."
 echo "Used vocals file: $VOCALS"
