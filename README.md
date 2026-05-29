@@ -1,4 +1,4 @@
-# Noise Filter
+# 🎤 Noise Filter
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: Linux | macOS](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey)](https://github.com/anomalyco/noise-filter)
@@ -6,61 +6,62 @@
 [![Tests](https://img.shields.io/badge/Tests-109%2F109%20passing-green)](tests/)
 [![FFmpeg 4.4+](https://img.shields.io/badge/FFmpeg-4.4%2B-lightgrey)](https://ffmpeg.org/)
 
-Noise Filter is a voice enhancement tool that extracts vocals from audio/video, applies a professional-grade 6-filter audio processing chain, and outputs clean WAV files with automatic naming.
+> 🎯 **Extract vocals → enhance → export.** A dual-interface voice enhancement tool that separates vocals from any audio/video, runs them through a professional-grade 6-filter FFmpeg chain, and outputs pristine WAV files — automatically named and never overwritten.
 
-It ships in two forms:
+It ships in **two forms**:
 
-- **`noise-filter` (Python CLI)** — Click CLI + Textual TUI with preset profiles, per-filter overrides, TOML config
-- **`./noise-filter` (Bash script)** — standalone Bash script with no Python dependency
+- 🐍 **`noise-filter` (Python CLI)** — Click CLI + Textual TUI with preset profiles, per-filter overrides, and TOML config
+- 🐚 **`./noise-filter` (Bash script)** — standalone Bash script with zero Python dependencies
 
-Both use the same backend pipeline: `audio-separator` for vocals extraction followed by FFmpeg's filter chain.
-
----
-
-## Features
-
-- **Voice extraction** — isolates vocals from any audio/video using `audio-separator` (BS-Roformer model)
-- **6-filter FFmpeg chain** — highpass → afftdn → anlmdn → acompressor → equalizer → lowpass
-- **4 built-in presets** — Light, Medium (default), Heavy, and Custom (user-defined)
-- **Per-filter overrides** — CLI flags and TUI inputs fine-tune individual parameters
-- **TOML configuration** — persistent user settings at `~/.config/noise-filter/config.toml`
-- **Auto-incrementing output** — never overwrites files; produces `_VOICE_ENHANCED_01.wav`, `_02`, etc.
-- **Dual interface** — full-featured Python CLI + TUI, or zero-dependency Bash script
-- **Cross-platform** — tested on Linux (x86_64), macOS Intel, and macOS Apple Silicon
+Both share the same backend pipeline: `audio-separator` for vocals extraction → FFmpeg 6-filter chain → auto-named output.
 
 ---
 
-## Table of Contents
+## ✨ Features
 
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Preset Reference](#preset-reference)
-- [Configuration](#configuration)
-- [How It Works](#how-it-works)
-- [Cross-Platform Compatibility](#cross-platform-compatibility)
-- [Project Structure](#project-structure)
-- [License](#license)
+- 🎤 **Voice extraction** — isolates vocals from any audio/video using `audio-separator` (BS-Roformer model)
+- 🔧 **6-filter FFmpeg chain** — `highpass` → `afftdn` → `anlmdn` → `acompressor` → `equalizer` → `lowpass`
+- 🎚️ **4 built-in presets** — Light, Medium (default), Heavy, and Custom (user-defined)
+- 🎛️ **Per-filter overrides** — CLI flags and TUI inputs fine-tune individual parameters
+- ⚙️ **TOML configuration** — persistent user settings at `~/.config/noise-filter/config.toml`
+- 🔢 **Auto-incrementing output** — never overwrites files; produces `_VOICE_ENHANCED_01.wav`, `_02`, etc.
+- 🖥️ **Dual interface** — full-featured Python CLI + TUI, or zero-dependency Bash script
+- 🍏🐧 **Cross-platform** — tested on Linux (x86_64), macOS Intel, and macOS Apple Silicon
 
 ---
 
-## Prerequisites
+## 📋 Table of Contents
+
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Preset Reference](#-preset-reference)
+- [Configuration](#-configuration)
+- [How It Works](#-how-it-works)
+- [Cross-Platform Compatibility](#-cross-platform-compatibility)
+- [Project Structure](#-project-structure)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 📦 Prerequisites
 
 | Tool | Version | Installation |
 |------|---------|-------------|
 | [FFmpeg](https://ffmpeg.org/) | 4.4+ | `apt install ffmpeg` (Debian) / `brew install ffmpeg` (macOS) |
 | [FFprobe](https://ffmpeg.org/ffprobe.html) | (ships with FFmpeg) | included with FFmpeg |
-| [audio-separator](https://github.com/nomadkaraoke/python-audio-separator) | latest | see [Installation](#installation) |
+| [audio-separator](https://github.com/nomadkaraoke/python-audio-separator) | latest | see [Installation](#-installation) |
 
 FFmpeg 4.4+ is required for the `anlmdn` audio filter. Most distribution packages and Homebrew builds satisfy this.
 
-For the Python CLI/TUI, you also need Python 3.11+ with `pip`.
+For the Python CLI/TUI, you also need **Python 3.11+** with `pip`.
 
 ---
 
-## Installation
+## 🚀 Installation
 
-### Quick Start (Bash Script)
+### 🐚 Quick Start (Bash Script)
 
 The `./noise-filter` Bash script has no Python dependencies — only FFmpeg and `audio-separator` are required.
 
@@ -78,7 +79,7 @@ cd noise-filter
 ./noise-filter recording.mkv
 ```
 
-### Python Package
+### 🐍 Python Package
 
 ```bash
 # FFmpeg and audio-separator still required (see above)
@@ -92,7 +93,7 @@ pip install -e .
 
 Dependencies installed automatically: `click`, `toml`, `textual`, `platformdirs`.
 
-### Verifying Installation
+### ✅ Verifying Installation
 
 ```bash
 # Bash script
@@ -107,9 +108,9 @@ noise-filter --tui
 
 ---
 
-## Usage
+## 🎮 Usage
 
-### Basic CLI Usage
+### 🖥️ Basic CLI Usage
 
 ```bash
 noise-filter [OPTIONS] [INPUT]
@@ -154,7 +155,7 @@ noise-filter input.mp4 -o ~/enhanced/
 ./noise-filter input.wav -o my-custom-name.wav
 ```
 
-### Presets
+### 🎚️ Presets
 
 Four presets control all 6 filters simultaneously:
 
@@ -165,9 +166,9 @@ Four presets control all 6 filters simultaneously:
 | `heavy` | Poor recording conditions (outdoor, cafe, construction noise) — may sound processed |
 | `custom` | User-defined values from config file `[override]` section |
 
-CLI flags override the preset for individual parameters. **Precedence:** CLI flags > config file > built-in preset defaults.
+> 💡 **Tip:** CLI flags override the preset for individual parameters. **Precedence:** CLI flags > config file > built-in preset defaults.
 
-### Per-Filter Overrides
+### 🎛️ Per-Filter Overrides
 
 Any filter parameter can be overridden on the command line:
 
@@ -177,7 +178,7 @@ noise-filter --preset light --highpass-freq 100 --equalizer-gain 3 input.wav
 
 This uses the Light preset but with a 100 Hz highpass (instead of 80) and +3 dB EQ gain (instead of +2).
 
-### Config File
+### ⚙️ Config File
 
 Persistent configuration at `~/.config/noise-filter/config.toml` (Linux) or `~/Library/Application Support/noise-filter/config.toml` (macOS):
 
@@ -195,9 +196,9 @@ acompressor_ratio = 4.0
 selected_preset = "heavy"
 ```
 
-See [Configuration](#configuration) for the full schema.
+See [Configuration](#-configuration) for the full schema.
 
-### TUI (Terminal UI)
+### 🖥️ TUI (Terminal UI)
 
 Launch with:
 
@@ -205,13 +206,13 @@ Launch with:
 noise-filter --tui
 ```
 
-The TUI has 3 screens with forward/back navigation:
+The TUI has **3 screens** with forward/back navigation:
 
-1. **Input & Preset** — Input file path, output directory, preset selector dropdown, "Next →" button
-2. **Filter Parameters** — All 11 per-filter parameter inputs with live filter chain preview, "← Back" and "Next →" buttons
-3. **Run & Results** — Filter chain preview string, Run button, progress bar, status/output text, "← Back" button
+1. **📂 Input & Preset** — Input file path, output directory, preset selector dropdown, "Next →" button
+2. **🎛️ Filter Parameters** — All 11 per-filter parameter inputs with live filter chain preview, "← Back" and "Next →" buttons
+3. **▶️ Run & Results** — Filter chain preview string, Run button, progress bar, status/output text, "← Back" button
 
-### Using noise-filter Directly
+### 🐚 Using the Bash Script Directly
 
 The Bash script offers a lightweight alternative with no Python dependency:
 
@@ -226,24 +227,24 @@ Options:
 
 The script uses the same medium preset defaults as `noise-filter --preset medium`.
 
-### Output Files
+### 📁 Output Files
 
 For an input file named `Screen-2026-04-24_10-54-42.mkv`, the pipeline produces:
 
 | File | Description |
 |------|-------------|
-| `Screen-2026-04-24_10-54-42_VOCALS_model_bs_roformer_ep_317_sdr_12.wav` | Extracted vocals stem |
-| `Screen-2026-04-24_10-54-42_INSTRUMENTALS_model_bs_roformer_ep_317_sdr_12.wav` | Remaining instrumental stem |
-| `Screen-2026-04-24_10-54-42_VOICE_ENHANCED_01.wav` | Final enhanced output |
+| `Screen-2026-04-24_10-54-42_VOCALS_model_bs_roformer_ep_317_sdr_12.wav` | 🎤 Extracted vocals stem |
+| `Screen-2026-04-24_10-54-42_INSTRUMENTALS_model_bs_roformer_ep_317_sdr_12.wav` | 🎵 Remaining instrumental stem |
+| `Screen-2026-04-24_10-54-42_VOICE_ENHANCED_01.wav` | ✨ Final enhanced output |
 
-The enhanced output filename auto-increments: `_VOICE_ENHANCED_01.wav`, `_02.wav`, `_03.wav` — existing files are never overwritten.
+> 🔒 The enhanced output filename auto-increments: `_VOICE_ENHANCED_01.wav`, `_02.wav`, `_03.wav` — existing files are **never overwritten**.
 
 ---
 
-## Preset Reference
+## 📊 Preset Reference
 
-| Filter | param | Light | Medium | Heavy |
-|--------|-------|-------|--------|-------|
+| Filter | param | ☀️ Light | 🌤️ Medium | 🌩️ Heavy |
+|--------|-------|:--------:|:----------:|:--------:|
 | highpass | f (Hz) | 80 | 120 | 200 |
 | afftdn | nf (dB) | -20 | -30 | -50 |
 | anlmdn | s | 3 | 7 | 12 |
@@ -259,24 +260,24 @@ The enhanced output filename auto-increments: `_VOICE_ENHANCED_01.wav`, `_02.wav
 **FFmpeg filter strings:**
 
 ```
-light:  highpass=f=80,afftdn=nf=-20,anlmdn=s=3:p=0.001,acompressor=threshold=-12dB:ratio=2,equalizer=f=3000:t=q:w=1:g=2,lowpass=f=12000
-medium: highpass=f=120,afftdn=nf=-30,anlmdn=s=7:p=0.002,acompressor=threshold=-18dB:ratio=3,equalizer=f=3000:t=q:w=1:g=4,lowpass=f=9000
-heavy:  highpass=f=200,afftdn=nf=-50,anlmdn=s=12:p=0.005,acompressor=threshold=-24dB:ratio=6,equalizer=f=2500:t=q:w=1.5:g=6,lowpass=f=7000
+☀️ light:  highpass=f=80,afftdn=nf=-20,anlmdn=s=3:p=0.001,acompressor=threshold=-12dB:ratio=2,equalizer=f=3000:t=q:w=1:g=2,lowpass=f=12000
+🌤️ medium: highpass=f=120,afftdn=nf=-30,anlmdn=s=7:p=0.002,acompressor=threshold=-18dB:ratio=3,equalizer=f=3000:t=q:w=1:g=4,lowpass=f=9000
+🌩️ heavy:  highpass=f=200,afftdn=nf=-50,anlmdn=s=12:p=0.005,acompressor=threshold=-24dB:ratio=6,equalizer=f=2500:t=q:w=1.5:g=6,lowpass=f=7000
 ```
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
-### File Location
+### 📁 File Location
 
 | Platform | Path |
 |----------|------|
-| Linux | `~/.config/noise-filter/config.toml` |
-| macOS | `~/Library/Application Support/noise-filter/config.toml` |
-| Fallback (XDG) | `$XDG_CONFIG_HOME/noise-filter/config.toml` |
+| 🐧 Linux | `~/.config/noise-filter/config.toml` |
+| 🍏 macOS | `~/Library/Application Support/noise-filter/config.toml` |
+| 📂 Fallback (XDG) | `$XDG_CONFIG_HOME/noise-filter/config.toml` |
 
-### Schema
+### 📝 Schema
 
 ```toml
 # Built-in preset overrides (optional — overrides individual default values)
@@ -307,11 +308,13 @@ selected_preset = "medium"   # or "light", "heavy", "custom"
 # force = false              # whether to overwrite without prompting
 ```
 
-### Precedence
+### 📐 Precedence
 
-CLI flags > `[override]` section > preset definition > built-in defaults
+```
+🥇 CLI flags  >  🥈 [override] section  >  🥉 preset definition  >  built-in defaults
+```
 
-### Parameter Validation
+### ✅ Parameter Validation
 
 - All numeric values are clamped to their documented min/max ranges
 - `equalizer_type` must be one of: `q`, `lowshelf`, `highshelf`, `lowpass`, `highpass`
@@ -320,54 +323,54 @@ CLI flags > `[override]` section > preset definition > built-in defaults
 
 ---
 
-## How It Works
+## 🔧 How It Works
 
 ```
 INPUT (audio or video)
     │
     ▼
 ┌─────────────────────────────┐
-│ ffprobe stream detection    │  Identifies audio & video streams
+│ ffprobe stream detection    │  🔍 Identifies audio & video streams
 └─────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────┐
-│ ffmpeg audio extraction     │  (video inputs only) Extract PCM
+│ ffmpeg audio extraction     │  🎞️ (video inputs only) Extract PCM
 │ pcm_s16le / 48 kHz / mono   │  audio stream to temp file
 └─────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────┐
-│ audio-separator             │  BS-Roformer model separates into
+│ audio-separator             │  🎤 BS-Roformer model separates into
 │ vocals stem extraction      │  Vocals + Instrumental stems
 └─────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────┐
-│ ffmpeg 6-filter chain       │  highpass → afftdn → anlmdn →
+│ ffmpeg 6-filter chain       │  🔧 highpass → afftdn → anlmdn →
 │                             │  acompressor → equalizer → lowpass
 └─────────────────────────────┘
     │
     ▼
-OUTPUT: _VOICE_ENHANCED_NN.wav
-+ _VOCALS_.wav (copied to output dir)
-+ _INSTRUMENTALS_.wav (copied to output dir)
+OUTPUT: _VOICE_ENHANCED_NN.wav   ✨
++ _VOCALS_.wav (copied to output dir)        🎤
++ _INSTRUMENTALS_.wav (copied to output dir) 🎵
 ```
 
 **Key design decisions:**
 
-- Pipe-free architecture uses temp files for reliability
-- 6-filter order is immutable — all presets use the same chain with different parameters
-- Vocal stem copied to output directory alongside enhanced result
-- Auto-incrementing filenames prevent accidental overwrites
-- Temp directory cleaned up on success, error, or Ctrl+C
+- 🏗️ Pipe-free architecture uses temp files for reliability
+- 🔒 6-filter order is immutable — all presets use the same chain with different parameters
+- 📋 Vocal stem copied to output directory alongside enhanced result
+- 🔢 Auto-incrementing filenames prevent accidental overwrites
+- 🧹 Temp directory cleaned up on success, error, or Ctrl+C
 
 ---
 
-## Cross-Platform Compatibility
+## 🖥️ Cross-Platform Compatibility
 
-| Capability | Linux (x86_64) | macOS Intel (x86_64) | macOS Apple Silicon (arm64) |
-|------------|:--------------:|:--------------------:|:---------------------------:|
+| Capability | 🐧 Linux (x86_64) | 🍏 macOS Intel (x86_64) | 🍎 macOS Apple Silicon (arm64) |
+|------------|:-----------------:|:-----------------------:|:-----------------------------:|
 | FFmpeg 4.4+ | ✅ `apt`/`dnf`/`pacman` | ✅ `brew` | ✅ `brew` |
 | audio-separator | ✅ | ✅ | ✅ |
 | Python 3.11+ | ✅ | ✅ | ✅ |
@@ -377,29 +380,39 @@ OUTPUT: _VOICE_ENHANCED_NN.wav
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 noise-filter/
-├── noise-filter              # Bash script — original voice enhancement engine
-├── noise_filter/              # Python package — CLI + TUI wrapper
+├── noise-filter              # 🐚 Bash script — original voice enhancement engine
+├── noise_filter/              # 🐍 Python package — CLI + TUI wrapper
 │   ├── __init__.py
-│   ├── cli.py                 # Click CLI entry point
-│   ├── config.py              # TOML config loading (XDG paths)
-│   ├── presets.py             # Built-in presets + filter string construction
-│   ├── subprocess.py          # ffmpeg/audio-separator subprocess orchestration
+│   ├── cli.py                 # 🖥️ Click CLI entry point
+│   ├── config.py              # ⚙️ TOML config loading (XDG paths)
+│   ├── presets.py             # 🎚️ Built-in presets + filter string construction
+│   ├── subprocess.py          # 🔧 ffmpeg/audio-separator subprocess orchestration
 │   └── tui/
 │       ├── __init__.py
-│       ├── app.py             # Textual TUI app (3-screen navigation)
-│       └── screens.py         # InputScreen, FilterScreen, RunScreen
-├── tests/                     # pytest test suite (109 tests)
-├── pyproject.toml             # Python package configuration
+│       ├── app.py             # 🖥️ Textual TUI app (3-screen navigation)
+│       └── screens.py         # 📂 InputScreen, 🎛️ FilterScreen, ▶️ RunScreen
+├── tests/                     # 🧪 pytest test suite (109 tests)
+├── pyproject.toml             # 📦 Python package configuration
 ├── README.md
-└── LICENSE                    # MIT License
+└── LICENSE                    # 📄 MIT License
 ```
 
 ---
 
-## License
+## 🤝 Contributing
 
-MIT — see [LICENSE](LICENSE).
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- 🛠️ Development setup
+- 🧪 Running tests (`pytest`)
+- 📐 Code style guidelines
+- 🔀 Pull request process
+
+---
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE). Free to use, modify, and distribute.
