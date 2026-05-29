@@ -1,0 +1,351 @@
+# ========================================
+# PROJECT TEMPLATE .gitignore
+# Copy this to any derived project and
+# uncomment sections relevant to your stack.
+# ========================================
+
+# ========================================
+# OS / File System
+# ========================================
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+*.lnk
+
+# ========================================
+# Environment / Secrets
+# ========================================
+.env
+.env.*
+!.env.example
+!.env.template
+*.local
+*.secret
+**/secrets/**
+**/credentials/**
+*.key
+*.pem
+*.keystore
+*.p12
+*.cert
+**/.auth/**
+**/tokens/**
+service-account*.json
+
+# ========================================
+# Dependencies
+# ========================================
+
+# Node / JavaScript / TypeScript
+**/node_modules/
+.jitpack
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Python / pip / conda
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+dist/
+*.whl
+*.tar.gz
+.venv/
+venv/
+env/
+ENV/
+.conda/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.hypothesis/
+.ruff_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+nox/
+*.cover
+
+# Go
+vendor/
+go.work.sum
+*.test
+*.out
+*.test.exe
+*.prof
+
+# Rust / Cargo
+target/
+**/target/
+build/
+*.rs.bk
+
+# Java / JVM
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+target/
+*.log.gz
+.mtj.tmp/
+*.ser
+.idea/tasks.xml
+.idea/workspace.xml
+.idea/
+
+# Kotlin
+.kotlin/
+
+# Scala
+*.class
+*.log
+target/
+*.jar
+
+# Stale test artifacts
+examples/project/**/.agent/inbox/
+examples/project/**/.agent/outbox/
+examples/project/**/.agent/processed/
+examples/project/**/.agent/task-log.md
+examples/project/**/.agent/tasks/
+
+# .NET / C#
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+.vs/
+*.nupkg
+*.snupkg
+*.cache
+*.dll
+*.exe
+*.pdb
+*.msi
+msbuild.log
+packages/
+_ReSharper*/
+*.resharper
+
+# Ruby / Rails
+.bundle/
+vendor/bundle
+vendor/ruby
+.bundled_gems
+Gemfile.lock
+log/
+tmp/
+storage/
+public/assets
+public/packs
+public/packs-test
+.yarn/cache/
+
+# PHP / Composer
+vendor/
+composer.lock
+.phpunit.result.cache
+.php_cs.cache
+.php_cs
+.php-cs-fixer.cache
+
+# Elixir / Mix
+deps/
+_build/
+*.ez
+*.beam
+mix.lock
+
+# Haskell / Stack
+.stack-work/
+dist/
+dist-newstyle/
+*.hi
+*.o
+
+# Swift / Xcode
+*.xcworkspace
+xcuserdata/
+DerivedData/
+.build/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+Pods/
+
+# Dart / Flutter
+.packages
+.pub/
+build/
+*.flutter-plugins
+*.flutter-plugins-dependencies
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+.pub-cache/
+
+# Lua
+*.luac
+lua_modules/
+
+# ========================================
+# Build Artifacts / Output (generic)
+# ========================================
+dist/
+build/
+.next/
+out/
+bin/
+obj/
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+*.lib
+*.a
+*.la
+*.lo
+*.class
+*.jar
+*.war
+*.ear
+*.pyc
+*.pyo
+*.elc
+*.hi
+*.beam
+*.class
+*.sass-cache/
+*.css.map
+*.min.js
+*.min.css
+sourcemaps/
+
+# ========================================
+# IDE / Editor
+# ========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.idea/
+.atom/
+.project
+.classpath
+.settings/
+.factorypath
+.externalToolBuilders/
+.nb*
+.hg/
+.svn/
+*.session
+*.session.xml
+.project
+.idea/
+
+# ========================================
+# Documentation / Temp
+# ========================================
+*.log
+*.bak
+*.tmp
+*.swp
+*.swo
+*~
+tags
+
+# ========================================
+# Docker
+# ========================================
+.docker/
+docker-compose.override.yml
+*.dockerignore
+
+# ========================================
+# Database / Storage
+# ========================================
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.ldb
+*.rdb
+*.dump
+*.sql.gz
+*.sql.tar.gz
+
+# ========================================
+# Testing / Coverage / Profiling
+# ========================================
+coverage/
+.coverage
+nyc_output/
+.jscov
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.pytest_cache/
+frontend/test-results/
+
+# ========================================
+# Large data files
+# ========================================
+*.csv.gz
+*.csv.bz2
+*.parquet
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.npy
+*.npz
+
+# Large video sample files
+movie-samples/
+
+# Agent-core (separate git repo)
+agent-core/
+
+# Agent config files / directories
+.claude/
+.codex/
+.opencode/
+opencode.json
+AGENTS.md
+CLAUDE.md
+benchmark_results.json

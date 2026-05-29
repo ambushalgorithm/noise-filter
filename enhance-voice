@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_NAME="$(basename "$0")"
+AUDIO_SEPARATOR="$HOME/.venvs/audio-separator/bin/audio-separator"
+INPUT_FILE=""
+OUTPUT_FILE=""
+FORCE=0
+
+cleanup() {
+    local exit_code=$?
+    if [[ -n "${TEMP_DIR:-}" && -d "$TEMP_DIR" ]]; then
+        rm -rf "$TEMP_DIR"
+    fi
+    exit "$exit_code"
+}
+trap cleanup EXIT INT TERM
+
+usage() {
+    cat <<EOF
+Usage: $SCRIPT_NAME [options] <input>
+
+Process an audio or video file to enhance/isolate voice audio by extracting
+the vocals stem and applying noise reduction and voice enhancement filters.
+
+Arguments:
+  <input>              Input audio or video file (must have an audio stream)
+
+Options:
+  -o <output>          Output file path (default: auto-named in input directory)
+  --force              Overwrite existing output file without error
+  --help               Show this help message and exit
+
+Examples:
+  $SCRIPT_NAME recording.mkv
+  $SCRIPT_NAME recording.wav -o enhanced.wav
+  $SCRIPT_NAME recording.mp4 --force
+EOF
+    exit 0
+}
+
+die() {
+    echo "Error: $*" >&2
+    exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --help|-h)
+            usage
+            ;;
+        --force)
+            FORCE=1
+            shift
+            ;;
+        -o)
+            if [[ $# -lt 2 ]]; then
+                die "-o requires an argument"
+            fi
+            OUTPUT_FILE="$2"
+            shift 2
+            ;;
+        -*)
+            die "Unknown option: $1. Use --help for usage."
+            ;;
+        *)
+            if [[ -z "$INPUT_FILE" ]]; then
+                INPUT_FILE="$1"
+                shift
+            else
+                die "Unexpected argument: $1"
+            fi
+            ;;
+    esac
+done
+
+[[ -n "$INPUT_FILE" ]] || die "No input file specified. Usage: $SCRIPT_NAME [options] <input>"
+[[ -f "$INPUT_FILE" ]] || die "Input file not found: $INPUT_FILE"
+[[ -r "$INPUT_FILE" ]] || die "Input file is not readable: $INPUT_FILE"
+
+command -v ffmpeg >/dev/null 2>&1 || {
+    cat >&2 <<'MSG'
+Error: ffmpeg is not installed.
+
+Install it using your package manager:
+  Linux (Debian/Ubuntu):  sudo apt install ffmpeg
+  Linux (Fedora):         sudo dnf install ffmpeg
+  Linux (Arch):           sudo pacman -S ffmpeg
+  macOS (Homebrew):       brew install ffmpeg
+
+See https://ffmpeg.org/download.html for other platforms.
+MSG
+    exit 1
+}
+
+command -v ffprobe >/dev/null 2>&1 || die "ffprobe is not installed (it ships with ffmpeg)."
+
+[[ -x "$AUDIO_SEPARATOR" ]] || die "audio-separator not found at $AUDIO_SEPARATOR"
+
+next_output_path() {
+    local dir="$1"
+    local stem="$2"
+    local ext="$3"
+    local n=1
+    local candidate
+    while :; do
+        candidate="${dir}/${stem}_$(printf "%02d" "$n").${ext}"
+        [ ! -e "$candidate" ] && {
+            echo "$candidate"
+            return
+        }
+        n=$((n + 1))
+    done
+}
+
+if [[ -z "$OUTPUT_FILE" ]]; then
+    INPUT_DIR="$(cd "$(dirname "$INPUT_FILE")" && pwd)"
+    BASENAME="${INPUT_FILE##*/}"
+    BASENAME="${BASENAME%.*}"
+    OUTPUT_FILE="$(next_output_path "$INPUT_DIR" "${BASENAME}_voice_enhanced" "wav")"
+fi
+
+if [[ -e "$OUTPUT_FILE" && "$FORCE" -eq 0 ]]; then
+    die "Output file already exists: $OUTPUT_FILE
+Use --force to overwrite."
+fi
+
+has_video=$(ffprobe -v error -select_streams v:0 -show_entries stream=index -of default=nokey=1:noprint_wrappers=1 "$INPUT_FILE" 2>/dev/null || true)
+
+audio_stream=$(ffprobe -v error -select_streams a:0 \
+    -show_entries stream=index -of default=nokey=1:noprint_wrappers=1 \
+    "$INPUT_FILE" 2>/dev/null || true)
+[[ -n "$audio_stream" ]] || die "No audio stream found in input file: $INPUT_FILE"
+
+TEMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enhance-voice.XXXXXX")
+
+if [[ -n "$has_video" ]]; then
+    echo "Extracting audio from $INPUT_FILE..."
+    ffmpeg -y -i "$INPUT_FILE" -vn -acodec pcm_s16le -ar 48000 -ac 1 \
+        "$TEMP_DIR/audio.wav" -loglevel warning -stats 2>&1 || die "Audio extraction failed."
+    AUDIO_TO_SEPARATE="$TEMP_DIR/audio.wav"
+else
+    AUDIO_TO_SEPARATE="$INPUT_FILE"
+fi
+
+echo "Running audio-separator to extract vocals stem..."
+"$AUDIO_SEPARATOR" "$AUDIO_TO_SEPARATE" --output_format wav --output_dir "$TEMP_DIR" 2>&1 || die "audio-separator failed."
+
+VOCALS=$(ls -t "$TEMP_DIR"/*"(Vocals)"*.wav 2>/dev/null | head -n 1)
+
+if [[ -z "$VOCALS" ]]; then
+    die "Error: could not find or create a vocals stem."
+fi
+
+echo "Enhancing voice..."
+ffmpeg -y -i "$VOCALS" \
+    -af "highpass=f=120,afftdn=nf=-30,anlmdn=s=7:p=0.002,acompressor=threshold=-18dB:ratio=3,equalizer=f=3000:t=q:w=1:g=4,lowpass=f=9000" \
+    "$OUTPUT_FILE" -loglevel warning -stats 2>&1 || die "Voice enhancement failed."
+
+echo "Done."
+echo "Used vocals file: $VOCALS"
+echo "Output file: $OUTPUT_FILE"
