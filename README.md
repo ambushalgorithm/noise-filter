@@ -1,7 +1,7 @@
 # 🎤 Noise Filter
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform: Linux | macOS](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey)](https://github.com/anomalyco/noise-filter)
+[![Platform: Linux | macOS](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey)](https://github.com/ambushalgorithm/noise-filter)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/Tests-109%2F109%20passing-green)](tests/)
 [![FFmpeg 4.4+](https://img.shields.io/badge/FFmpeg-4.4%2B-lightgrey)](https://ffmpeg.org/)
@@ -74,7 +74,7 @@ brew install ffmpeg            # macOS
 pip install audio-separator
 
 # Download and use the script
-git clone https://github.com/anomalyco/noise-filter.git
+git clone https://github.com/ambushalgorithm/noise-filter.git
 cd noise-filter
 ./noise-filter recording.mkv
 ```
@@ -86,7 +86,7 @@ cd noise-filter
 pip install noise-filter
 
 # Or from source
-git clone https://github.com/anomalyco/noise-filter.git
+git clone https://github.com/ambushalgorithm/noise-filter.git
 cd noise-filter
 pip install -e .
 ```

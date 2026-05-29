@@ -28,7 +28,7 @@ Thank you for considering contributing! This document covers the development wor
 ### Clone and Install
 
 ```bash
-git clone https://github.com/anomalyco/noise-filter.git
+git clone https://github.com/ambushalgorithm/noise-filter.git
 cd noise-filter
 
 # Install the Python package in editable mode
