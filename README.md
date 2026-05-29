@@ -70,8 +70,9 @@ The `./noise-filter` Bash script has no Python dependencies — only FFmpeg and 
 sudo apt install ffmpeg        # Linux
 brew install ffmpeg            # macOS
 
-# Install audio-separator (expected at ~/.venvs/audio-separator/bin/audio-separator)
-pip install audio-separator
+# Install audio-separator in a virtual environment
+python3 -m venv ~/.venvs/audio-separator
+~/.venvs/audio-separator/bin/pip install audio-separator
 
 # Download and use the script
 git clone https://github.com/ambushalgorithm/noise-filter.git
@@ -227,6 +228,11 @@ Options:
 
 The script uses the same medium preset defaults as `noise-filter --preset medium`.
 
+When run, it produces three files in the output directory:
+- **Enhanced WAV** — noise-reduced vocals (auto-named)
+- **Vocals stem** — raw vocals extraction (copied from separator)
+- **Instrumental stem** — remaining audio (copied from separator, if available)
+
 ### 📁 Output Files
 
 For an input file named `Screen-2026-04-24_10-54-42.mkv`, the pipeline produces:
@@ -304,7 +310,6 @@ equalizer_gain = 4
 [defaults]
 selected_preset = "medium"   # or "light", "heavy", "custom"
 # output_dir = "~/enhanced"  # optional default output directory
-# keep_stems = false         # whether to keep separated stems alongside output
 # force = false              # whether to overwrite without prompting
 ```
 

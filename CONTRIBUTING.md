@@ -40,7 +40,21 @@ noise-filter --help
 
 ### audio-separator Setup
 
-The project expects `audio-separator` at `~/.venvs/audio-separator/bin/audio-separator`. For development without the real tool, a mock script is available:
+The project expects `audio-separator` at `~/.venvs/audio-separator/bin/audio-separator`:
+
+```bash
+python3 -m venv ~/.venvs/audio-separator
+~/.venvs/audio-separator/bin/pip install audio-separator
+```
+
+On Python 3.14, the `@beartype` decorator in audio-separator's `BSRoformer` and `MelBandRoformer` classes needs to be patched:
+
+```bash
+cd ~/.venvs/audio-separator/lib/python*/site-packages/audio_separator/separator/uvr_lib_v5/roformer/
+sed -i 's/^    @beartype/    # @beartype (patched for Python 3.14 compat)/' bs_roformer.py mel_band_roformer.py
+```
+
+For CI or offline environments without the real tool, a mock script can be placed at the same path — it copies the input audio as a faux vocals stem:
 
 ```bash
 mkdir -p ~/.venvs/audio-separator/bin
