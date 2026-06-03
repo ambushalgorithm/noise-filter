@@ -156,7 +156,9 @@ fi
 echo "Enhancing voice..."
 ffmpeg -y -i "$VOCALS" \
     -af "highpass=f=120,afftdn=nf=-30,anlmdn=s=7:p=0.002,acompressor=threshold=-18dB:ratio=3,equalizer=f=3000:t=q:w=1:g=4,lowpass=f=9000" \
-    "$OUTPUT_FILE" -loglevel warning -stats 2>&1 || die "Voice enhancement failed."
+    "$TEMP_DIR/enhanced.wav" -loglevel warning -stats 2>&1 || die "Voice enhancement failed."
+
+cp "$TEMP_DIR/enhanced.wav" "$OUTPUT_FILE"
 
 OUTPUT_DIR="$(dirname "$OUTPUT_FILE")"
 

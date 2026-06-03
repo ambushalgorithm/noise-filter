@@ -101,13 +101,15 @@ def run_enhance(input_path: Path, filter_string: str, output_dir: Optional[Path]
             raise FileNotFoundError("Could not find or create a vocals stem.")
 
         output_file = next_output_path(output_dir, f"{basename}_VOICE_ENHANCED", "wav")
+        temp_output = temp_dir / f"{basename}_VOICE_ENHANCED_temp.wav"
         print("Enhancing voice...", file=sys.stderr)
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(vocals),
              "-af", filter_string,
-             str(output_file), "-loglevel", "warning", "-stats"],
+             str(temp_output), "-loglevel", "warning", "-stats"],
             check=True, capture_output=True, text=True,
         )
+        shutil.copy2(str(temp_output), str(output_file))
 
         stem_paths = {"vocals": str(vocals), "instrumental": str(instrumental) if instrumental else None}
         if instrumental:
