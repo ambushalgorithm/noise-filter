@@ -63,6 +63,7 @@ def run_enhance(input_path: Path, filter_string: str, output_dir: Optional[Path]
         raise ValueError(f"No audio stream found in input: {input_path}")
 
     temp_dir = Path(tempfile.mkdtemp(prefix="noise-filter-"))
+    cleanup_temp = True
 
     try:
         if has_video:
@@ -109,18 +110,23 @@ def run_enhance(input_path: Path, filter_string: str, output_dir: Optional[Path]
              str(temp_output), "-loglevel", "warning", "-stats"],
             check=True, capture_output=True, text=True,
         )
-        shutil.copy2(str(temp_output), str(output_file))
+        try:
+            shutil.copy2(str(temp_output), str(output_file))
 
-        stem_paths = {"vocals": str(vocals), "instrumental": str(instrumental) if instrumental else None}
-        if instrumental:
-            new_name = instrumental.name.replace("(Instrumental)", "INSTRUMENTALS")
-            dest_instr = output_dir / new_name
-            shutil.copy2(str(instrumental), str(dest_instr))
-            stem_paths["instrumental"] = str(dest_instr)
-        new_name = vocals.name.replace("(Vocals)", "VOCALS")
-        dest_vocals = output_dir / new_name
-        shutil.copy2(str(vocals), str(dest_vocals))
-        stem_paths["vocals"] = str(dest_vocals)
+            stem_paths = {"vocals": str(vocals), "instrumental": str(instrumental) if instrumental else None}
+            if instrumental:
+                new_name = instrumental.name.replace("(Instrumental)", "INSTRUMENTALS")
+                dest_instr = output_dir / new_name
+                shutil.copy2(str(instrumental), str(dest_instr))
+                stem_paths["instrumental"] = str(dest_instr)
+            new_name = vocals.name.replace("(Vocals)", "VOCALS")
+            dest_vocals = output_dir / new_name
+            shutil.copy2(str(vocals), str(dest_vocals))
+            stem_paths["vocals"] = str(dest_vocals)
+        except Exception:
+            cleanup_temp = False
+            print(f"Error: copy failed. Temp files preserved at {temp_dir}", file=sys.stderr)
+            raise
 
         print("Done.", file=sys.stderr)
         print(f"Output file: {output_file}", file=sys.stderr)
@@ -131,4 +137,5 @@ def run_enhance(input_path: Path, filter_string: str, output_dir: Optional[Path]
             "instrumental_stem": stem_paths.get("instrumental"),
         }
     finally:
-        shutil.rmtree(temp_dir, ignore_errors=True)
+        if cleanup_temp:
+            shutil.rmtree(temp_dir, ignore_errors=True)
